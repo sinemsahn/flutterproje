@@ -1,118 +1,78 @@
-
-
+//login olacak 2. sayfaya yönlendir.
 import 'package:flutter/material.dart';
 
-class HomePage extends StatelessWidget{
-  late String username;
-  late String password;
-  final _formKey= GlobalKey<FormState>();
-
-  get context => null;
+import 'adminindex.dart';
+void main() => runApp(MyApp());
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-
-      appBar: AppBar(
-        title:Text('Admin Girişi'),
-      ),
-      body: Form(
-        child: Padding(
-        padding: const EdgeInsets.only(left: 20.0, right: 20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center ,
-          children: <Widget>[
-
-            TextFormField(
-
-              decoration: InputDecoration (
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: Colors.purple
-                  ),
-
-                ),
-                labelText: "Kullanıcı Adı",
-                border: OutlineInputBorder()
-
-              ),
-              validator:(value) {
-                if(value!.isEmpty){
-                  return "Kullanıcı Adını Giriniz..";
-
-                }
-                else{
-                  return null;
-                }
-              },
-              onSaved: (value){
-                username=value!;
-              },
-            ) ,SizedBox(height: 10.0),
-            TextFormField(
-
-              decoration: InputDecoration (
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: Colors.purple
-                    ),
-
-                  ),
-                  labelText: "Parola",
-                  border: OutlineInputBorder()
-
-              ),
-              validator:(value) {
-                if(value!.isEmpty){
-                  return "Parolanızı Giriniz..";
-
-                }
-                else{
-                  return null;
-                }
-              },
-              onSaved: (value){
-                username=value!;
-              },
-            ),
-            Row(
-              children: <Widget>[
-                MaterialButton(child:Text("Giriş"),onPressed: (){})
-              ],
-            ),
-            _loginButton()
-
-
-
-          ],
+    final appTitle = 'Form Doğrulama Denemesi';
+    return MaterialApp(
+      title: appTitle,
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text(appTitle),
         ),
-      ),
+        body: MyCustomForm(),
       ),
     );
   }
-
-Widget _loginButton() => RaisedButton(child:Text("Giriş Yap"),onPressed: (){
-if(_formKey.currentState!.validate()){
-  _formKey.currentState!.save();
-  if(username=="admin" && password=="password"){
-    //diğer sayfaya gitsin
+}
+class MyCustomForm extends StatefulWidget {
+  @override
+  MyCustomFormState createState() {
+    return MyCustomFormState();
   }
-
-  //debugPrint("username: ", username);
-//her şey tamam ise save kısımları çalışır
 }
-else{
+class MyCustomFormState extends State<MyCustomForm> {
+  final _formKey = GlobalKey<FormState>();
+  String adi = "";
+  String password = "";
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          TextFormField(
+            validator: (deger) {
+              if (deger!.isEmpty) {
+                return "Lütfen kullanıcı adı giriniz.";
+              }
+              adi= deger;
+              return null;
+            },
+          ),
+          TextFormField(
+            validator: (deger) {
+              if (deger!.length < 8) {
+                return "Lütfen kullanıcı daha uzun bir şifre giriniz.";
+              }
+              password= deger;
+              return null;
+            },
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (_formKey.currentState!.validate()) {
+                print("Kullanıcı kaydı yapılıyor.");
+                print(adi);
+                print(password);
+                if(password =="admin1234" && adi =="admin"){
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>MySecondPage()));
+                }
+                else{
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>MyApp()));
 
-  showDialog(context: context, builder:(BuildContext context){
-    return AlertDialog(
-      title: Text("Hata"),
-      content: Text("Giriş Bilgileriniz Hatalı"),
-      actions: <Widget>[
-        MaterialButton(child:Text("Geri Dön"),onPressed: ()=>Navigator.pop(context))
-      ],
+                }
+
+              }
+            },
+            child: Text('Onayla'),
+          )
+        ],
+      ),
     );
-
-  });
-  
-}
-});
+  }
 }

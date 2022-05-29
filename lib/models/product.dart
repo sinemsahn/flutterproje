@@ -3,13 +3,12 @@ class Product{
   String _name="";
   String _description="";
   String _resim="";
-  String _kategori="";
 
   int get id=> _id;
   String get name=> _name;
   String get description => _description;
   String get resim=> _resim;
-  String get kategori => _kategori;
+
 
   set name(String newname){
     _name = newname;
@@ -20,11 +19,9 @@ class Product{
   set resim(String newresim){
     _resim = newresim;
   }
-  set kategori(String newkategori){
-    _kategori=newkategori;
-  }
-  Product(this._name, this._description, this._resim,this._kategori);
-  Product.withId(this._id,this._name,this._description,this._resim,this._kategori);
+
+  Product(this._name, this._description, this._resim);
+  Product.withId(this._id,this._name,this._description,this._resim);
 
 
 Map<String, dynamic> toMap(){
@@ -32,7 +29,7 @@ Map<String, dynamic> toMap(){
   map["name"]=_name;
   map["description"]=_description;
   map["resim"]=_resim;
-  map["kategori"]=_kategori;
+
   if(_id != null){
     map["id"]=_id;
   }
@@ -45,7 +42,7 @@ Map<String, dynamic> toMap(){
     this._name=o["name"];
     this._description=o["description"];
     this._resim=o["resim"];
-    this._kategori=o["kategori"];
+
   }
 
 

@@ -1,77 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:projem/data/dbHelper.dart';
+import 'package:projem/screens/yorum_add.dart';
 
 import '../models/product.dart';
-import 'package:projem/screens/yorum_add.dart';
+
+import '../models/yorum.dart';
+
 
 class ProductDetail extends StatefulWidget{
   Product product;
+
+
   ProductDetail(this.product);
+
 
   @override
   State<StatefulWidget> createState() {
     return _ProductDetailState(product);
   }
 
+
+
 }
 //BU SAYFA AÇILINCA YORUMLARI DA ALMALI DİREKT
 enum Options{delete,update}
 
 
-class _ProductDetailState extends State{
+class _ProductDetailState extends State {
+
+  late List<Yorum> yorums;
+  late int yorumCount;
+
   var dbHelper = DbHelper();
   var txtName = TextEditingController();
   var txtDescription = TextEditingController();
   var txtResim = TextEditingController();
-  var txtKategori=TextEditingController();
+
 
   @override
-  void initState(){
-    txtName.text=product.name;
-    txtDescription.text=product.description;
-    txtResim.text=product.resim;
-    txtKategori.text=product.kategori;
+  void initState() {
+    txtName.text = product.name;
+    txtDescription.text = product.description;
+    txtResim.text = product.resim;
+
     super.initState();
+    getYorums(product.name);
   }
 
   Product product;
+
+
   _ProductDetailState(this.product);
 
 //burada bir buton olacak ve ürün ekleme gibi yorum ekle olacak
   @override
   Widget build(BuildContext context) {
+    IconButton commentbutton = IconButton(
+
+      iconSize: 35.0,
+      icon: Icon(Icons.chat_bubble_outline,
+          color: Colors.green),
+      onPressed: () => _comment(),
+    );
+
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Ürün detayı: : ${product.name}"),
-        actions: <Widget>[
-          PopupMenuButton<Options>(
-            onSelected: selectProcess,
-            itemBuilder: (BuildContext context)=><PopupMenuEntry<Options>>[
-              PopupMenuItem<Options>(
-                value:Options.delete,
-                child: Text("Sil"),
-              ),
-              PopupMenuItem<Options>(
-                value:Options.update,
-                child: Text("Güncelle"),
-              ),
+        resizeToAvoidBottomInset: false, // set it to false
 
-            ],
+        appBar: AppBar(
+          title: Text("Ürün Adı: ${product.name}"),
 
-          )
-        ],
 
-      ),
-      body: buildProductDetail(),
-      floatingActionButton:  FloatingActionButton(
-        onPressed: (){
-          //ürün açıklama sayfasına gitsin
-          goToYorumAdd();
-        },
-        child: Icon(Icons.add),
-        tooltip: "Yorum ekle",
-      )
+        ),
+        body: SingleChildScrollView(child: buildProductDetail(),),
 
+        floatingActionButton: commentbutton
     );
   }
 
@@ -79,64 +82,78 @@ class _ProductDetailState extends State{
     return Padding(
       //kendi içindeki uzaklık
         padding: EdgeInsets.all(30.0),
-        child:Column(
+        child: Column(
           children: <Widget>[
-            buildNameField(), buildDescriptionField(), buildResimField(), buildKategori()
+            buildField(),buildYorumList()
           ],
         )
     );
   }
-  buildResimField() {
-    return TextField(
-      decoration: InputDecoration(labelText: "Ürün Resmi"),
-      controller: txtResim, //oraya otomatik ekler
 
+  buildField() {
+    var card = new Card(
+      child: new Column(
+        children: [
+          new ListTile(
+
+            title: CircleAvatar(backgroundColor: Colors.black12,child: Image.network(product.resim),),
+          ),
+          new Divider(color: Colors.blue, indent: 16.0,),
+          new ListTile(
+
+            title: new Text("${product.description} "
+              , style: new TextStyle(fontWeight: FontWeight.w400),),
+          )
+        ],
+      ),
     );
-  }
-  buildNameField() {
-    return TextField(
-      decoration: InputDecoration(labelText: "Ürün adı"),
-      controller: txtName, //oraya otomatik ekler
-
-    );
-  }
-  buildDescriptionField() {
-    return TextField(
-      decoration: InputDecoration(labelText: "Ürün açıklaması"),
-      controller: txtDescription, //oraya otomatik ekler
-
-    );
-  }
-  buildKategori() {
-    return TextField(
-      decoration: InputDecoration(labelText: "Ürün kategorisi"),
-      controller: txtKategori, //oraya otomatik ekler
-
-    );
-  }
-  void selectProcess(Options options) async{
-    switch(options){
-      case Options.delete:
-        await dbHelper.delete(product.id);
-        Navigator.pop(context, true);
-        break;
-
-      case Options.update:
-        await dbHelper.update(Product.withId(product.id, txtName.text, txtDescription.text, txtKategori.text,txtResim.text));
-        Navigator.pop(context, true);
-        break;
-      default:
-
-    }
-
+    return card;
   }
 
-  void goToYorumAdd() async{
-    print("tamam");
+  ListView buildYorumList() {
+    return ListView.builder(
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        itemCount: yorumCount,
+        itemBuilder: (BuildContext context, int position) {
+          return Card(
 
+            elevation: 1.0,
+            margin: EdgeInsets.all(10),
+            color: Colors.cyan,
 
-
-
+            child: ListTile(
+              leading: CircleAvatar(backgroundColor: Colors.black12,child: Image.network("https://raw.githubusercontent.com/sinemsahn/flutterresimler/main/istockphoto-1300845620-612x612.jpg"),),
+              //burays o resmi eklemeli
+              title: Text(this.yorums[position].name),
+              subtitle: Text(this.yorums[position].yorum),
+              onTap: () {
+                //goToDetail(this.yorums[position]);silsin
+              }, //tıklanınca onun detayınına gidecek
+            ),
+          );
+        });
   }
+
+  void getYorums(String adi) async {
+    var productsFuture = dbHelper.getYorums(adi);
+    productsFuture.then((data) {
+      setState(() {
+        this.yorums = data;
+        yorumCount = data.length;
+        print(this.yorums);
+        print(yorumCount);
+      });
+    });
+  }
+
+  _comment() {
+    setState(() {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => YorumAdd(product.name)));
+    });
+  }
+
+
 }
 
